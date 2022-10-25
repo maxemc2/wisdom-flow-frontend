@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
-	Button, useToast, Modal, ModalCloseButton,
+	Button, Stack, useToast, Modal, ModalCloseButton,
 	ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody,
 	FormControl, FormLabel, FormErrorMessage, FormHelperText,
-	Input, InputGroup, InputRightElement
+	Input, InputGroup, InputRightElement, Select
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { useFormik } from 'formik';
+import { register } from '../../Utils/api'
 
 export default function RegisterForm({ isOpen, onClose }) {
 	const toast = useToast();
@@ -20,28 +21,42 @@ export default function RegisterForm({ isOpen, onClose }) {
 		return errors;
 	};
 	const onSubmit = (values) => {
-		if (!(values.account === 'test' && values.password === 'Test@1234')) {
+		register( values.account, values.password, values.name, values.gender, values.age )
+		.then(res => {
+			if (res === 'True') {
+				toast({
+					title: '註冊成功!',
+					status: 'success',
+					duration: 5000,
+					isClosable: true,
+				});
+				onClose();
+			}
+			else {
+				toast({
+					title: '註冊失敗!',
+					status: 'error',
+					duration: 5000,
+					isClosable: true,
+				});
+			}
+		})
+		.catch(() => 
 			toast({
 				title: '註冊失敗!',
 				status: 'error',
 				duration: 5000,
 				isClosable: true,
-			});
-		}
-		else {
-			toast({
-				title: '註冊成功!',
-				status: 'success',
-				duration: 5000,
-				isClosable: true,
-			});
-			onClose();
-		}
+			})
+		)
 	};
 	const formik = useFormik({
 		initialValues: {
+			name: '',
 			account: '',
 			password: '',
+			gender: '',
+			age: ''
 		},
 		validate,
 		onSubmit,
@@ -55,35 +70,66 @@ export default function RegisterForm({ isOpen, onClose }) {
 				<ModalCloseButton />
 				<form onSubmit={formik.handleSubmit}>
 					<ModalBody>
-						<FormControl isInvalid={formik.errors.account}>
-							<FormLabel>帳號</FormLabel>
-							<InputGroup>
-								<Input type='text' name='account'
-									onChange={formik.handleChange} value={formik.values.account}
-								/>
-							</InputGroup>
-							<FormErrorMessage>{formik.errors.account}</FormErrorMessage>
-						</FormControl>
-						<FormControl mt='10px' isInvalid={formik.errors.password}>
-							<FormLabel>密碼</FormLabel>
-							<InputGroup>
-								<Input type={visiblePassword ? 'text' : 'password'} name='password'
-									onChange={formik.handleChange} value={formik.values.password}
-								/>
-								{formik.values.password && (
-									<InputRightElement color="primary.main" cursor={'pointer'}
-										onClick={() => setVisiblePassword(!visiblePassword)}
-										children={visiblePassword ? <ViewOffIcon /> : <ViewIcon />}
+						<Stack spacing='10px'>
+							<FormControl isInvalid={formik.errors.name}>
+								<FormLabel>使用者名稱</FormLabel>
+								<InputGroup>
+									<Input type='text' name='name'
+										onChange={formik.handleChange} value={formik.values.name}
 									/>
-								)}
-							</InputGroup>
-							<FormHelperText>
-								請混合使用 8 個字元以上的大小寫英文字母、數字和符號
-							</FormHelperText>
-							<FormErrorMessage>{formik.errors.password}</FormErrorMessage>
-						</FormControl>
+								</InputGroup>
+								<FormErrorMessage>{formik.errors.name}</FormErrorMessage>
+							</FormControl>
+							<FormControl isInvalid={formik.errors.account}>
+								<FormLabel>電子信箱（帳號）</FormLabel>
+								<InputGroup>
+									<Input type='text' name='account'
+										onChange={formik.handleChange} value={formik.values.account}
+									/>
+								</InputGroup>
+								<FormErrorMessage>{formik.errors.account}</FormErrorMessage>
+							</FormControl>
+							<FormControl isInvalid={formik.errors.password}>
+								<FormLabel>密碼</FormLabel>
+								<InputGroup>
+									<Input type={visiblePassword ? 'text' : 'password'} name='password'
+										onChange={formik.handleChange} value={formik.values.password}
+									/>
+									{formik.values.password && (
+										<InputRightElement color="primary.main" cursor={'pointer'}
+											onClick={() => setVisiblePassword(!visiblePassword)}
+											children={visiblePassword ? <ViewOffIcon /> : <ViewIcon />}
+										/>
+									)}
+								</InputGroup>
+								<FormHelperText>
+									請混合使用 8 個字元以上的大小寫英文字母、數字和符號
+								</FormHelperText>
+								<FormErrorMessage>{formik.errors.password}</FormErrorMessage>
+							</FormControl>
+							<FormControl isInvalid={formik.errors.account}>
+								<FormLabel>性別</FormLabel>
+								<InputGroup>
+									<Select name='gender'
+										onChange={formik.handleChange} value={formik.values.gender}
+									>
+										<option value='男'>男</option>
+										<option value='女'>女</option>
+									</Select>
+								</InputGroup>
+								<FormErrorMessage>{formik.errors.gender}</FormErrorMessage>
+							</FormControl>
+							<FormControl isInvalid={formik.errors.age}>
+								<FormLabel>年齡</FormLabel>
+								<InputGroup>
+									<Input type='text' name='age'
+										onChange={formik.handleChange} value={formik.values.age}
+									/>
+								</InputGroup>
+								<FormErrorMessage>{formik.errors.age}</FormErrorMessage>
+							</FormControl>
+						</Stack>
 					</ModalBody>
-
 					<ModalFooter>
 						<Button variant="solid" onClick={onClose}>
 							取消

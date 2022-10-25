@@ -19,6 +19,7 @@ export default function LoginButton() {
 		else
 			setLogined(false);
 	}, [isLoginModal])
+	
 	return (
 		<>
 			<Flex position='fixed' zIndex='999' top={['60px', '20px', '20px']} right={['16px', '36px', '36px']}>

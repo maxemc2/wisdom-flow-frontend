@@ -4,16 +4,19 @@ import { ArrowRightIcon, ArrowLeftIcon } from '@chakra-ui/icons'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 
 import PopularPopup from '../Components/Map/PopularPopup';
-import { getAllAttraction, getFlow } from '../Utils/api';
-import { locationList, townList, population } from './Data'
+import { getAllAttraction, getFlow, getIcon } from '../Utils/api';
+import { townList } from './Data'
 
 export default function CurrentFlow() {
-	const time = new Date().toISOString().slice(0,10);
+	const today = new Date().toISOString().slice(0,10);
 	const [center, setCenter] = useState([22.992677, 120.205153]);
 	const [town, setTown] = useState('');
 	const [day, setDay] = useState('2022-09-01');
-	const [hour, setHour] = useState('0');
-	const [slide, setSlide] = useState(0)
+	const [hour, setHour] = useState(0);
+	const [slide, setSlide] = useState(0);
+	const [locations, setLocations] = useState([]);
+	const [flows, setFlows] = useState([]);
+	const [icons, setIcons] = useState([]);
 
 	const getAllDay = () => {
 		const getDate = (dateStr) => {  
@@ -32,18 +35,17 @@ export default function CurrentFlow() {
 			dateList.push(year+'-'+month+'-'+day);
 			startDate.setDate(startDate.getDate()+1);
 		}
-		return dateList;
-		console.log(dateList)
-	}
-	
+		return dateList;		
+	};
 	const LocationBlock = ({ location }) => (
 		<Stack gap='0.5px'>
-			<Text>{location.name}</Text>
+			<Text>{location.attraction}</Text>
 			<Text>地址: {location.address}</Text>
 			<Text>電話: {location.phone}</Text>
 			<Flex gap='18px'>
-				<Box p='4px 6px' bg='#FF9F10' color='white' borderRadius='4px'>當前人數值: {location.population}</Box>
-				<Box p='4px 6px' bg='#10A9FF' color='white' borderRadius='4px'>停留時間(估): {location.stayTime}</Box>
+				<Box p='4px 6px' bg='#FF9F10' color='white' borderRadius='4px'>
+					當前人數值: { flows[location.attraction] !== undefined ? flows[location.attraction][day][hour]['平日'] : ''}
+				</Box>
 			</Flex>
 		</Stack>
 	);
@@ -73,8 +75,11 @@ export default function CurrentFlow() {
 					w={['110px', '130px', '140px']} h={['32px', '40px', '48px']} fontSize={['12px', '16px', '18px']}
 					value={day} onChange={e => setDay(e.target.value)}
 				>
-					<option value='2022-09-06'>{time}</option>
-					<option value='2022-09-07'>2022/09/07</option>
+					{
+						getAllDay().map((date) => (
+							<option value={date} key={date}>{date}</option>
+						))
+					}
 				</Select>
 				<Select placeholder='請選擇小時' bg='white'
 					w={['110px', '130px', '140px']} h={['32px', '40px', '48px']} fontSize={['12px', '16px', '18px']}
@@ -89,12 +94,28 @@ export default function CurrentFlow() {
 			</Flex>
 		)
 	};
+	const updateIcons = () => {
+		let email =  "";
+    if(JSON.parse(localStorage.getItem('account')))
+      email = JSON.parse(localStorage.getItem('account'));
+			
+		getIcon('get', email)
+		.then(res => setIcons(res));
+	}
 
 	useEffect(() => {
-		getFlow()
-		.then(res => console.log(res));
-		// getAllDay()
+		let email =  "";
+    if(JSON.parse(localStorage.getItem('account')))
+      email = JSON.parse(localStorage.getItem('account'));
+
+		getAllAttraction()
+		.then(res => setLocations(res));
+		getFlow('2022-09-01', today)
+		.then(res => setFlows(res));
+		getIcon('get', email)
+		.then(res => setIcons(res))
 	}, [])
+
 	return (
 		<Flex h='100vh'>
 			<Flex name='locationList' alignItems='center'
@@ -106,8 +127,9 @@ export default function CurrentFlow() {
 				>
 					<Text>資訊更新時間: {new Date().toTimeString().substring(0, 8)}</Text>
 					{
-						locationList.map((location) =>
-							<Stack key={location.name}>
+						locations && flows &&
+						locations.map((location) =>
+							<Stack key={location.attraction}>
 								<Divider orientation='horizontal' />
 								<LocationBlock location={location} />
 							</Stack>
@@ -132,12 +154,11 @@ export default function CurrentFlow() {
 					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 				/>
 				{
-					locationList.map((location) => {
-						if(day && hour){
-							location.population = population['國華海安商圈'][day.toString()][hour.toString()]['平日'];
-						}
+					locations && locations.map((location) => {
+						location.population = flows[location.attraction] !== undefined ? flows[location.attraction][day][hour]['平日'] : '';
+						let index = icons[location.attraction] !== undefined ? icons[location.attraction] : null;
 						return (
-							<PopularPopup index={8} location={location} key={location.name}/>
+							<PopularPopup index={index} location={location} key={location.attraction} update={updateIcons}/>
 						)
 					})
 				}

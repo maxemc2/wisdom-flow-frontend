@@ -7,7 +7,7 @@ import '../../Leaflet_awesome_markers/leaflet.awesome-markers.js';
 
 import ColorSelector from "./ColorSelector";
 
-export default function PopularPopup({ location, index = null }) {
+export default function PopularPopup({ location, index = null, update }) {
 	let marker = null;
 	let iconList = [
 		{'icon': 'bag-handle-outline', 'color': 'red'},
@@ -20,7 +20,6 @@ export default function PopularPopup({ location, index = null }) {
 		{'icon': 'subway-outline', 'color': 'purple'},
 		{'icon': 'restaurant-outline', 'color': 'darkpurple'},
 	]
-
 	if(index !== null){
 		marker = L.AwesomeMarkers.icon({
 			icon: iconList[index]['icon'],
@@ -38,8 +37,8 @@ export default function PopularPopup({ location, index = null }) {
 			<Popup>
 				<Stack gap='0.5px' fontSize='14px'>
 					<Flex justify='space-between'>
-						<Text>{location.name}</Text>
-						<ColorSelector Trigger={
+						<Text>{location.attraction}</Text>
+						<ColorSelector location={location.attraction} update={update} Trigger={
 							<Button variant='primarySolid' w='66px' h='22px' fontSize='10px' borderRadius='2px'>變更標誌</Button>
 						}/>
 					</Flex>
@@ -47,7 +46,6 @@ export default function PopularPopup({ location, index = null }) {
 					<Text>電話: {location.phone}<i class="bi bi-1-circle-fill"></i></Text>
 					<Flex gap='18px'>
 						<Box p='4px 6px' bg='#FF9F10' color='white' borderRadius='4px'>當前人數值: {location.population}</Box>
-						<Box p='4px 6px' bg='#10A9FF' color='white' borderRadius='4px'>停留時間(估): {location.stayTime}</Box>
 					</Flex>
 				</Stack>
 			</Popup>

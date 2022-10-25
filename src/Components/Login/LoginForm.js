@@ -7,6 +7,7 @@ import {
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { useFormik } from 'formik';
+import { login } from '../../Utils/api'
 import RegisterForm from './RegisterForm';
 
 export default function LoginForm({ isOpen, onClose }) {
@@ -22,27 +23,40 @@ export default function LoginForm({ isOpen, onClose }) {
 		return errors;
 	};
 	const onSubmit = (values) => {
-		if (!(values.account === 'test' && values.password === 'Test@1234')) {
-			formik.setFieldError('account', '帳號或密碼錯誤');
-			formik.setFieldError('password', '帳號或密碼錯誤');
+		login(values.account, values.password)
+		.then(res => {
+			console.log(res)
+			if (res === 'True') {
+				toast({
+					title: '登入成功!',
+					status: 'success',
+					duration: 5000,
+					isClosable: true,
+				});
+				localStorage.clear();
+				localStorage.setItem('auth', JSON.stringify(true));
+				localStorage.setItem('account', JSON.stringify(values.account));
+				onClose();
+			}
+			else {
+				formik.setFieldError('account', '帳號或密碼錯誤');
+				formik.setFieldError('password', '帳號或密碼錯誤');
+				toast({
+					title: '登入失敗!',
+					status: 'error',
+					duration: 5000,
+					isClosable: true,
+				});
+			}
+		})
+		.catch(() => {
 			toast({
 				title: '登入失敗!',
 				status: 'error',
 				duration: 5000,
 				isClosable: true,
 			});
-		}
-		else {
-			toast({
-				title: '登入成功!',
-				status: 'success',
-				duration: 5000,
-				isClosable: true,
-			});
-			localStorage.clear();
-			localStorage.setItem('auth', JSON.stringify(true));
-			onClose();
-		}
+		})
 	};
 	const formik = useFormik({
 		initialValues: {
@@ -52,6 +66,7 @@ export default function LoginForm({ isOpen, onClose }) {
 		validate,
 		onSubmit,
 	});
+	
 	useEffect(() => {
 		formik.resetForm();
 	}, [isOpen]);

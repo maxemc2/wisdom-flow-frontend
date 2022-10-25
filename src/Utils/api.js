@@ -10,7 +10,8 @@ export const customFetch = async ( url, method, params = {}, data = {} ) => {
   const res = await axios({ baseURL, url, method, headers, params, data })
   .catch(error => console.log(error));
 
-  return res;
+  if(res)
+    return res.data;
 };
 
 export const register = (email, password, user_name, gender, age) => 
@@ -25,8 +26,8 @@ export const getAllAttraction = () =>
 export const getFlow = (start_time, end_time) =>
   customFetch('/flow_report', 'post', { }, { start_time, end_time });
 
-export const getIcon = (email, attraction) =>
-  customFetch('/icon', 'get', { }, { email, attraction });
+export const getIcon = (method, email) =>
+  customFetch('/icon', 'post', { }, { method, email });
 
-export const setIcon = (email, attraction, icon) =>
-  customFetch('/icon', 'set', { }, { email, attraction, icon });
+export const setIcon = (method, email, attraction, icon) =>
+  customFetch('/icon', 'post', { }, { method, email, attraction, icon });
