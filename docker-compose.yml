@@ -10,4 +10,4 @@ services:
       - "${EXPORT_PORT}:80"
     volumes:
       - ./nginx:/etc/nginx/conf.d
-      - ./dist:/var/www/html
+      - ./build:/var/www/html
