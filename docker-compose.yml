@@ -1,13 +1,11 @@
-version: "3.5"
-
+version: '3.3'
 services:
   wisdom-flow-frontend:
-    image: nginx:1.15
     container_name: wisdom-flow-frontend
+    build: .
+    image: wisdom-flow-frontend
+    restart: always
     env_file:
-      - .env
+      - ./.env
     ports:
-      - "${EXPORT_PORT}:80"
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-      - ./build:/var/www/html
+      - "${EXPORT_PORT}:3000"
