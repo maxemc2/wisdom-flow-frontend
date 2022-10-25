@@ -1,25 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { ChakraProvider } from '@chakra-ui/react';
+import theme from './Theme/index';
+import 'leaflet/dist/leaflet.css'
+import './App.css'
 
-function App() {
+import CurrentFlow from './Pages/CurrentFlow';
+import FutureFlow from './Pages/FutureFlow';
+import LoginButton from './Components/Login/LoginButton';
+import ModeFilter from './Components/General/ModeFilter';
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ChakraProvider theme={theme}>
+      <Router>
+        <LoginButton />
+        <ModeFilter />
+        <Switch>
+          <Route path="/future" component={FutureFlow} />
+          <Route path="/" component={CurrentFlow} />
+        </Switch>
+      </Router>
+    </ChakraProvider>
   );
 }
-
-export default App;
